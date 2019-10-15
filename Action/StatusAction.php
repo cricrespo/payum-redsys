@@ -5,10 +5,18 @@ use Crevillo\Payum\Redsys\Api;
 use Payum\Core\Action\ActionInterface;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Exception\RequestNotSupportedException;
+use Payum\Core\GatewayAwareInterface;
+use Payum\Core\GatewayAwareTrait;
+use Payum\Core\Request\GetHttpRequest;
 use Payum\Core\Request\GetStatusInterface;
+use Payum\Core\Security\GenericTokenFactoryAwareInterface;
+use Payum\Core\Security\GenericTokenFactoryAwareTrait;
 
-class StatusAction implements ActionInterface
+class StatusAction implements ActionInterface, GatewayAwareInterface, GenericTokenFactoryAwareInterface
 {
+
+    use GatewayAwareTrait;
+    use GenericTokenFactoryAwareTrait;
     /**
      * {@inheritDoc}
      */
@@ -18,6 +26,18 @@ class StatusAction implements ActionInterface
         RequestNotSupportedException::assertSupports($this, $request);
 
         $model = ArrayObject::ensureArrayObject($request->getModel());
+
+        $this->gateway->execute($httpRequest = new GetHttpRequest());
+
+        if(isset($httpRequest->query['cancel'])) {
+            $request->markCanceled();
+            return;
+        }
+
+        if(isset($httpRequest->query['accept'])) {
+            $request->markCaptured();
+            return;
+        }
 
         if (null == $model['Ds_Response']) {
             $request->markNew();
