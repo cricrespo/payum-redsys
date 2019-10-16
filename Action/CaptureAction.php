@@ -88,6 +88,9 @@ class CaptureAction implements ActionInterface, ApiAwareInterface, GenericTokenF
         }
 
         $details['Ds_SignatureVersion'] = Api::SIGNATURE_VERSION;
+        $Ds_Merchant_Order = intval($request->getFirstModel()->getId());
+        $Ds_Merchant_Order = strval($Ds_Merchant_Order);
+        $postData['Ds_Merchant_Order'] = '0000'.$Ds_Merchant_Order;
 
         if (false == $postData['Ds_MerchantParameters'] && $request->getToken()) {
             $details['Ds_MerchantParameters'] = $this->api->createMerchantParameters($postData->toUnsafeArray());
